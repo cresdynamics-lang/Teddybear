@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600" fill="none">
+  <rect width="600" height="600" fill="#F5EDE4"/>
+  <circle cx="300" cy="260" r="80" fill="#E8D5C4"/>
+  <ellipse cx="300" cy="420" rx="120" ry="90" fill="#E8D5C4"/>
+  <circle cx="260" cy="240" r="12" fill="#6D2E46" opacity="0.6"/>
+  <circle cx="340" cy="240" r="12" fill="#6D2E46" opacity="0.6"/>
+  <path d="M270 290 Q300 320 330 290" stroke="#6D2E46" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.5"/>
+  <text x="300" y="540" text-anchor="middle" font-family="Georgia, serif" font-size="22" fill="#6D2E46" opacity="0.7">Teddy Bear Kenya</text>
+</svg>
