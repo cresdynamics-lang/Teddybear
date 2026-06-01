@@ -1,31 +1,33 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Instagram } from "lucide-react";
+import { UGC_IMAGES } from "@/lib/products";
 import { site } from "@/lib/site";
 
 export default function InstagramSection() {
   return (
-    <section className="py-16 md:py-20 bg-gradient-to-b from-white to-blush">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-        <Instagram className="w-10 h-10 text-rose-500 mx-auto mb-4" />
-        <span className="section-eyebrow">Follow us on Instagram</span>
-        <h2 className="font-display text-2xl md:text-3xl font-bold text-cocoa mb-3">
-          @teddybearhavenkenya
+    <section className="py-16 container-main">
+      <div className="text-center mb-8">
+        <h2 className="font-display text-2xl md:text-3xl font-medium text-ink">
+          Tag us {site.instagram}
         </h2>
-        <p className="text-cocoa/55 mb-6 leading-relaxed">
-          🧸 Birthdays · Love · Apologies · Just Because
-          <br />
-          🚚 Countrywide Delivery · 📞 {site.phoneDisplay}
-          <br />
-          M-Pesa Till: {site.mpesa.till1} or {site.mpesa.till2}
-        </p>
-        <Link
-          href={site.instagram}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-primary"
-        >
-          Follow on Instagram
-        </Link>
+        <p className="text-ink-muted mt-2 text-sm">Share your BearHug moments with us</p>
+      </div>
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3">
+        {UGC_IMAGES.map((src, i) => (
+          <a
+            key={i}
+            href={site.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative aspect-square rounded-xl overflow-hidden"
+          >
+            <Image src={src} alt={`Customer photo ${i + 1}`} fill className="object-cover" />
+            <div className="absolute inset-0 bg-ink/0 group-hover:bg-ink/40 transition-colors flex items-center justify-center">
+              <Instagram className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </a>
+        ))}
       </div>
     </section>
   );

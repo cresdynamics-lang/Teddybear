@@ -7,97 +7,40 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-sand text-ink antialiased;
+    @apply bg-cream text-ink antialiased;
   }
   ::selection {
-    @apply bg-wine-100 text-wine-dark;
+    @apply bg-blush text-ink;
   }
 }
 
 @layer components {
   .container-main {
-    @apply max-w-7xl mx-auto px-5 sm:px-8;
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2.5 rounded-full bg-ink px-8 py-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-wine hover:shadow-elevated hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-wine/30 focus:ring-offset-2 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-caramel px-6 py-3 min-h-[44px] text-sm font-semibold text-white transition-all duration-300 hover:bg-caramel-dark hover:shadow-elevated focus:outline-none focus:ring-2 focus:ring-caramel/30 focus:ring-offset-2 disabled:opacity-50;
   }
 
-  .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2.5 rounded-full border border-ink/15 bg-white px-8 py-4 text-sm font-semibold text-ink transition-all duration-300 hover:border-ink/30 hover:shadow-soft;
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-caramel bg-transparent px-6 py-3 min-h-[44px] text-sm font-semibold text-caramel transition-all duration-300 hover:bg-caramel/5;
   }
 
-  .btn-wine {
-    @apply inline-flex items-center justify-center gap-2.5 rounded-full bg-wine px-8 py-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-wine-light hover:shadow-elevated hover:-translate-y-0.5;
-  }
-
-  .btn-outline-white {
-    @apply inline-flex items-center justify-center gap-2.5 rounded-full border border-white/40 text-white px-8 py-4 text-sm font-semibold hover:bg-white/10 transition-all duration-300;
-  }
-
-  .btn-ghost {
-    @apply inline-flex items-center gap-2 text-sm font-semibold text-ink hover:text-wine transition-colors underline-offset-4 hover:underline;
+  .btn-mpesa {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-mpesa px-6 py-3 min-h-[44px] text-sm font-semibold text-white transition-all duration-300 hover:bg-mpesa-dark animate-pulseMpesa focus:outline-none focus:ring-2 focus:ring-mpesa/30 focus:ring-offset-2;
   }
 
   .input-field {
-    @apply w-full rounded-2xl border border-ink/10 bg-white px-5 py-3.5 text-ink placeholder:text-ink-light focus:border-wine/40 focus:outline-none focus:ring-4 focus:ring-wine/5 transition;
-  }
-
-  .card {
-    @apply rounded-3xl bg-white shadow-card overflow-hidden transition-all duration-300;
-  }
-
-  .card-hover {
-    @apply card hover:shadow-soft hover:-translate-y-1;
+    @apply w-full rounded-xl border border-ink/10 bg-white px-4 py-3 min-h-[44px] text-ink placeholder:text-ink-light focus:border-caramel/40 focus:outline-none focus:ring-4 focus:ring-caramel/5 transition;
   }
 
   .glass-nav {
-    @apply bg-white/80 backdrop-blur-2xl border-b border-ink/5;
+    @apply bg-cream/85 backdrop-blur-xl border-b border-caramel/10;
   }
 
-  .glass-nav-solid {
-    @apply bg-white/95 backdrop-blur-2xl border-b border-ink/5 shadow-sm;
-  }
-
-  .text-gradient {
-    @apply bg-gradient-to-r from-wine via-wine-light to-champagne bg-clip-text text-transparent;
-  }
-
-  .badge-sale {
-    @apply absolute top-4 left-4 z-20 bg-champagne text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full;
-  }
-
-  .badge-sold {
-    @apply absolute top-4 left-4 z-20 bg-ink/80 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full backdrop-blur-sm;
-  }
-
-  .badge-new {
-    @apply absolute top-4 left-4 z-20 bg-wine text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full;
-  }
-
-  .section-label {
-    @apply text-[11px] font-bold uppercase tracking-[0.25em] text-wine mb-4 block;
-  }
-
-  .section-title {
-    @apply font-display text-3xl md:text-4xl lg:text-[2.75rem] font-medium text-ink leading-[1.1] tracking-tight;
-  }
-
-  .section-subtitle {
-    @apply text-ink-muted text-base md:text-lg leading-relaxed max-w-xl;
-  }
-
-  .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-
-  .image-zoom {
-    @apply transition-transform duration-700 ease-out group-hover:scale-105;
-  }
-}
-
-@layer utilities {
-  .animate-marquee {
-    animation: marquee 40s linear infinite;
+  .paw-pattern {
+    background-image: radial-gradient(circle at 20% 80%, rgba(139, 94, 60, 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(245, 197, 197, 0.08) 0%, transparent 50%);
   }
 }

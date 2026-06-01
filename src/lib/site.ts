@@ -1,14 +1,16 @@
-/** Business details — update here before go-live */
+/** BearHug KE — business details */
 export const site = {
-  name: "Teddy Bear Kenya",
-  tagline: "Premium Teddy Bears & Personalized Gifts",
+  name: "BearHug KE",
+  tagline: "Every bear tells a story.",
   description:
-    "Kenya's trusted teddy bear shop — giant plush bears, personalized embroidery, and countrywide delivery from Nairobi.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://teddybearkenya.co.ke",
+    "Handpicked teddy bears delivered across Kenya. Same-day Nairobi delivery. M-Pesa accepted.",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://bearhugke.co.ke",
   phone: "0712667782",
   phoneDisplay: "+254 712 667 782",
   whatsapp: "254712667782",
-  email: "hello@teddybearkenya.co.ke",
+  email: "hello@bearhugke.co.ke",
+  instagram: "@BearHugKE",
+  instagramUrl: "https://www.instagram.com/bearhugke/",
   address: {
     line1: "Yala Towers, Biashara Street",
     line2: "4th Floor, Nairobi CBD",
@@ -16,20 +18,25 @@ export const site = {
     country: "Kenya",
   },
   mpesa: {
+    till: "9466773",
     till1: "9466773",
     till2: "8928010",
   },
-  instagram: "https://www.instagram.com/teddybearhavenkenya/",
   hours: "Mon–Sat: 9am – 6pm",
   stats: {
     happyClients: "100+",
     delivery: "Countrywide",
   },
+  delivery: {
+    freeThreshold: 3000,
+    standardFee: 300,
+    giftWrapFee: 150,
+  },
 } as const;
 
 export const whatsappLink = (message?: string) => {
   const text = encodeURIComponent(
-    message ?? "Hi Teddy Bear Kenya! I'd like to order a teddy bear."
+    message ?? "Hi BearHug KE, I'd like to order a teddy bear…"
   );
   return `https://wa.me/${site.whatsapp}?text=${text}`;
 };

@@ -1,15 +1,14 @@
 import { Suspense } from "react";
 import ShopClient from "@/components/ShopClient";
 
+export const metadata = {
+  title: "Shop Bears | BearHug KE",
+  description: "Browse our collection of premium teddy bears for every occasion.",
+};
+
 export default function ShopPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="max-w-7xl mx-auto px-4 py-20 text-center text-cocoa/50">
-          Loading shop…
-        </div>
-      }
-    >
+    <Suspense fallback={<div className="container-main py-16 text-center">Loading shop…</div>}>
       <ShopClient />
     </Suspense>
   );

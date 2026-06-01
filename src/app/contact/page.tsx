@@ -9,11 +9,15 @@ export default function ContactPage() {
 
   return (
     <div>
-      <div className="bg-sand border-b border-ink/5">
+      <div className="bg-blush/20 border-b border-caramel/10">
         <div className="container-main py-14 md:py-20">
-          <p className="section-label">Get in touch</p>
-          <h1 className="section-title mb-4">We&apos;d love to hear from you</h1>
-          <p className="section-subtitle">
+          <p className="text-sm font-semibold uppercase tracking-widest text-caramel mb-4">
+            Get in touch
+          </p>
+          <h1 className="font-display text-3xl md:text-4xl font-medium text-ink mb-4">
+            We&apos;d love to hear from you
+          </h1>
+          <p className="text-ink-muted text-base md:text-lg leading-relaxed max-w-xl">
             Need help choosing the right size? WhatsApp us for the fastest reply — we typically respond within minutes.
           </p>
         </div>
@@ -31,7 +35,7 @@ export default function ContactPage() {
                     href={whatsappLink()}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-wine font-semibold hover:underline"
+                    className="inline-flex items-center gap-1 text-caramel font-semibold hover:underline"
                   >
                     Open WhatsApp <ArrowUpRight className="w-4 h-4" />
                   </a>
@@ -62,7 +66,7 @@ export default function ContactPage() {
               {
                 icon: CreditCard,
                 title: "M-Pesa Till",
-                body: `${site.mpesa.till1} · ${site.mpesa.till2}`,
+                body: site.mpesa.till,
               },
               {
                 icon: Mail,
@@ -74,9 +78,9 @@ export default function ContactPage() {
                 ),
               },
             ].map(({ icon: Icon, title, body }) => (
-              <div key={title} className="flex gap-4 p-5 rounded-3xl bg-sand">
+              <div key={title} className="flex gap-4 p-5 rounded-2xl bg-cream-dark">
                 <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-card">
-                  <Icon className="w-5 h-5 text-wine" strokeWidth={1.5} />
+                  <Icon className="w-5 h-5 text-caramel" strokeWidth={1.5} />
                 </div>
                 <div>
                   <h2 className="font-semibold text-ink text-sm mb-1">{title}</h2>
@@ -87,7 +91,7 @@ export default function ContactPage() {
           </div>
 
           <div className="lg:col-span-3">
-            <div className="card p-8 md:p-10">
+            <div className="bg-white rounded-3xl shadow-card p-8 md:p-10">
               {sent ? (
                 <div className="text-center py-16">
                   <p className="text-5xl mb-5">🧸</p>

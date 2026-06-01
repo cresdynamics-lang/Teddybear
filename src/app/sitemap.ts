@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
-import { products } from "@/data/products";
+import { products } from "@/lib/products";
 import { site } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = site.url.replace(/\/$/, "");
   const productPages = products.map((p) => ({
-    url: `${base}/product/${p.slug}`,
+    url: `${base}/shop/${p.slug}`,
     lastModified: new Date(p.createdAt),
     changeFrequency: "weekly" as const,
     priority: 0.8,
@@ -14,7 +14,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: base, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
     { url: `${base}/shop`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/custom`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/track`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/account`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/wishlist`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/orders`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/login`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
     ...productPages,
   ];
 }
