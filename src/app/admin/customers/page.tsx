@@ -1,17 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchAllCustomers, fetchAllOrders } from "@/lib/actions/orders";
-import type { User, Order } from "@/types/order";
+import { getAllRegisteredUsers } from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
+import type { User } from "@/types/order";
 
 export default function AdminCustomersPage() {
   const [customers, setCustomers] = useState<User[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
+  const credentials = useAuthStore((s) => s.credentials);
+  const orders = useAuthStore((s) => s.orders);
 
   useEffect(() => {
-    fetchAllCustomers().then(setCustomers).catch(() => setCustomers([]));
-    fetchAllOrders().then(setOrders).catch(() => setOrders([]));
-  }, []);
+    setCustomers(getAllRegisteredUsers());
+  }, [credentials]);
 
   return (
     <div>
@@ -40,8 +41,8 @@ export default function AdminCustomersPage() {
                   return (
                     <tr key={c.id} className="border-b border-gray-50">
                       <td className="p-4 font-medium">{c.name}</td>
-                      <td className="p-4 text-ink-muted">{c.email || "—"}</td>
-                      <td className="p-4">{c.phone || "—"}</td>
+                      <td className="p-4 text-ink-muted">{c.email}</td>
+                      <td className="p-4">{c.phone}</td>
                       <td className="p-4">{orderCount}</td>
                     </tr>
                   );

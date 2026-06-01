@@ -7,16 +7,15 @@ import { formatKES } from "@/lib/format";
 
 export default function DeliveryTrustStrip() {
   const settings = useSiteSettings();
-  const freeThreshold = settings.freeDeliveryThreshold ?? site.delivery.freeThreshold;
 
   const items = [
     {
       icon: Truck,
-      label: `Free delivery over ${formatKES(freeThreshold)}`,
+      label: `Free delivery over ${formatKES(settings.freeDeliveryThreshold)}`,
     },
     {
       icon: Smartphone,
-      label: `M-Pesa Till ${settings.mpesaTill || site.mpesa.till}`,
+      label: `M-Pesa Till ${settings.mpesaTill}`,
     },
     {
       icon: Gift,

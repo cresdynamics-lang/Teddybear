@@ -4,9 +4,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { trackOrderSchema, type TrackOrderSchema } from "@/lib/validators";
-import { fetchOrderByRef } from "@/lib/actions/orders";
-import { getOrderProgress } from "@/types/order";
-import { Check, PackageX, Loader2 } from "lucide-react";
+import { useAuthStore, getOrderProgress } from "@/store/authStore";
+import { Check, PackageX } from "lucide-react";
 import { formatKES } from "@/lib/format";
 import type { Order } from "@/types/order";
 
@@ -18,10 +17,10 @@ const STEPS = [
 ] as const;
 
 export default function TrackOrderClient() {
+  const getOrderByRef = useAuthStore((s) => s.getOrderByRef);
   const [tracked, setTracked] = useState(false);
   const [order, setOrder] = useState<Order | null>(null);
   const [notFound, setNotFound] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -31,14 +30,12 @@ export default function TrackOrderClient() {
     resolver: zodResolver(trackOrderSchema),
   });
 
-  const onSubmit = async (data: TrackOrderSchema) => {
-    setLoading(true);
-    setNotFound(false);
-    const found = await fetchOrderByRef(data.orderNumber, data.phone);
-    setLoading(false);
+  const onSubmit = (data: TrackOrderSchema) => {
+    const found = getOrderByRef(data.orderNumber, data.phone);
     if (found) {
       setOrder(found);
       setTracked(true);
+      setNotFound(false);
     } else {
       setOrder(null);
       setTracked(false);
@@ -81,15 +78,8 @@ export default function TrackOrderClient() {
           />
           {errors.phone && <p className="text-red-600 text-xs mt-1">{errors.phone.message}</p>}
         </div>
-        <button type="submit" disabled={loading} className="btn-primary w-full">
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin inline mr-2" />
-              Searching…
-            </>
-          ) : (
-            "Track Order"
-          )}
+        <button type="submit" className="btn-primary w-full">
+          Track Order
         </button>
       </form>
 

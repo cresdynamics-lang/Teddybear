@@ -1,21 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import { useCatalogStore } from "@/store/catalogStore";
-import {
-  adminCreateTestimonial,
-  adminDeleteTestimonial,
-  adminUpdateTestimonial,
-} from "@/lib/actions/admin";
-import { refreshCatalog } from "@/lib/refreshCatalog";
-import { toastError, toastSuccess } from "@/store/toastStore";
 import type { Testimonial } from "@/types/admin";
 
 export default function AdminTestimonialsPage() {
   const testimonials = useCatalogStore((s) => s.testimonials);
+  const addTestimonial = useCatalogStore((s) => s.addTestimonial);
+  const updateTestimonial = useCatalogStore((s) => s.updateTestimonial);
+  const deleteTestimonial = useCatalogStore((s) => s.deleteTestimonial);
+
   const [editing, setEditing] = useState<Testimonial | null>(null);
-  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     name: "",
     city: "",
@@ -24,54 +20,31 @@ export default function AdminTestimonialsPage() {
     occasion: "Birthday",
   });
 
-  useEffect(() => {
-    if (editing) {
-      setForm({
-        name: editing.name,
-        city: editing.city,
-        rating: editing.rating,
-        quote: editing.quote,
-        occasion: editing.occasion,
-      });
-    }
-  }, [editing]);
-
   const resetForm = () => {
     setForm({ name: "", city: "", rating: 5, quote: "", occasion: "Birthday" });
     setEditing(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
-    try {
-      if (editing) {
-        await adminUpdateTestimonial(editing.id, form);
-      } else {
-        await adminCreateTestimonial(form);
-      }
-      await refreshCatalog();
-      resetForm();
-      toastSuccess(editing ? "Testimonial updated" : "Testimonial added");
-    } catch (err) {
-      toastError(err instanceof Error ? err.message : "Failed to save testimonial");
-    } finally {
-      setSaving(false);
+    if (editing) {
+      updateTestimonial(editing.id, form);
+    } else {
+      addTestimonial(form);
     }
+    resetForm();
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this testimonial?")) return;
-    try {
-      await adminDeleteTestimonial(id);
-      await refreshCatalog();
-      toastSuccess("Testimonial deleted");
-    } catch (err) {
-      toastError(err instanceof Error ? err.message : "Failed to delete");
-    }
+  const startEdit = (t: Testimonial) => {
+    setEditing(t);
+    setForm({
+      name: t.name,
+      city: t.city,
+      rating: t.rating,
+      quote: t.quote,
+      occasion: t.occasion,
+    });
   };
-
-  const startEdit = (t: Testimonial) => setEditing(t);
 
   return (
     <div>
@@ -128,7 +101,7 @@ export default function AdminTestimonialsPage() {
             className="input-field resize-none"
           />
           <div className="flex gap-2">
-            <button type="submit" disabled={saving} className="btn-primary bg-caramel">
+            <button type="submit" className="btn-primary bg-caramel">
               {editing ? "Save Changes" : "Add Testimonial"}
             </button>
             {editing && (
@@ -159,7 +132,9 @@ export default function AdminTestimonialsPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDelete(t.id)}
+                    onClick={() => {
+                      if (confirm("Delete this testimonial?")) deleteTestimonial(t.id);
+                    }}
                     className="p-2 rounded-lg hover:bg-red-50 text-red-600"
                   >
                     <Trash2 className="w-4 h-4" />

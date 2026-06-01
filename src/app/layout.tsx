@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import StorefrontShell from "@/components/StorefrontShell";
-import CatalogProvider from "@/providers/CatalogProvider";
-import AuthProvider from "@/providers/AuthProvider";
 import ToastContainer from "@/components/ToastContainer";
 import { site } from "@/lib/site";
 
@@ -46,12 +44,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
-        <CatalogProvider>
-          <AuthProvider>
-            <StorefrontShell>{children}</StorefrontShell>
-            <ToastContainer />
-          </AuthProvider>
-        </CatalogProvider>
+        <StorefrontShell>{children}</StorefrontShell>
+        <ToastContainer />
       </body>
     </html>
   );

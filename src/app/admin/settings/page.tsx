@@ -1,61 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCatalogStore, defaultSiteSettings } from "@/store/catalogStore";
-import { adminSeedCatalog, adminUpdateSiteSettings } from "@/lib/actions/admin";
-import { refreshCatalog } from "@/lib/refreshCatalog";
-import { toastError, toastSuccess } from "@/store/toastStore";
-import type { SiteSettings } from "@/types/admin";
 
 export default function AdminSettingsPage() {
   const settings = useCatalogStore((s) => s.settings);
+  const updateSettings = useCatalogStore((s) => s.updateSettings);
+  const resetToDefaults = useCatalogStore((s) => s.resetToDefaults);
   const [saved, setSaved] = useState(false);
-  const [seeding, setSeeding] = useState(false);
-  const [seedMessage, setSeedMessage] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState<SiteSettings>(settings);
+  const [form, setForm] = useState(settings);
 
-  useEffect(() => {
-    setForm(settings);
-  }, [settings]);
-
-  const update = (key: keyof SiteSettings, value: string | number) =>
+  const update = (key: keyof typeof form, value: string | number) =>
     setForm((f) => ({ ...f, [key]: value }));
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
-    try {
-      await adminUpdateSiteSettings(form);
-      await refreshCatalog();
-      setSaved(true);
-      toastSuccess("Settings saved");
-      setTimeout(() => setSaved(false), 2000);
-    } catch (err) {
-      toastError(err instanceof Error ? err.message : "Failed to save settings");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSeed = async () => {
-    if (!confirm("Import default products, testimonials, and settings into Supabase?")) return;
-    setSeeding(true);
-    setSeedMessage("");
-    try {
-      const result = await adminSeedCatalog();
-      await refreshCatalog();
-      const msg = result.message ?? (result.ok ? "Catalog seeded." : "Seed skipped.");
-      setSeedMessage(msg);
-      if (result.ok) toastSuccess(msg);
-      else toastError(msg);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Seed failed";
-      setSeedMessage(msg);
-      toastError(msg);
-    } finally {
-      setSeeding(false);
-    }
+    updateSettings(form);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   return (
@@ -70,9 +32,6 @@ export default function AdminSettingsPage() {
           <div className="p-3 rounded-xl bg-green-50 text-green-700 text-sm">
             Settings saved successfully!
           </div>
-        )}
-        {seedMessage && (
-          <div className="p-3 rounded-xl bg-caramel/10 text-caramel text-sm">{seedMessage}</div>
         )}
 
         <section className="space-y-4">
@@ -184,23 +143,20 @@ export default function AdminSettingsPage() {
         </section>
 
         <div className="flex flex-wrap gap-3 pt-2">
-          <button type="submit" disabled={saving} className="btn-primary bg-caramel">
-            {saving ? "Saving…" : "Save Settings"}
+          <button type="submit" className="btn-primary bg-caramel">
+            Save Settings
           </button>
           <button
             type="button"
-            disabled={seeding}
-            onClick={handleSeed}
-            className="btn-outline"
-          >
-            {seeding ? "Seeding…" : "Seed Catalog to Supabase"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setForm(defaultSiteSettings)}
+            onClick={() => {
+              if (confirm("Reset all catalog data to defaults? This cannot be undone.")) {
+                resetToDefaults();
+                setForm(defaultSiteSettings);
+              }
+            }}
             className="btn-outline text-red-600 border-red-200 hover:bg-red-50"
           >
-            Reset Form to Defaults
+            Reset Catalog to Defaults
           </button>
         </div>
       </form>

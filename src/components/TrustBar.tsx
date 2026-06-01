@@ -2,15 +2,13 @@
 
 import { Shield, Truck, Headphones, Smartphone } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useCatalog";
-import { site } from "@/lib/site";
 
 export default function TrustBar() {
   const settings = useSiteSettings();
-  const till = settings.mpesaTill || site.mpesa.till;
 
   const features = [
     { icon: Truck, title: "Countrywide delivery", desc: "Same-day Nairobi · 2–3 days nationwide" },
-    { icon: Smartphone, title: "M-Pesa accepted", desc: `Pay via Till ${till}` },
+    { icon: Smartphone, title: "M-Pesa accepted", desc: `Pay via Till ${settings.mpesaTill}` },
     { icon: Headphones, title: "WhatsApp support", desc: "Fast replies · Order help" },
     { icon: Shield, title: "Quality guaranteed", desc: "Premium plush · Gift-ready packaging" },
   ];

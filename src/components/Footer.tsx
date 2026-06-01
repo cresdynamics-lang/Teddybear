@@ -17,7 +17,6 @@ const footerLinks = {
   ],
   Company: [
     { href: "/#about", label: "About Us" },
-    { href: "/admin/login", label: "Admin Panel" },
     { href: site.instagramUrl, label: "Instagram" },
   ],
   "Follow Us": [

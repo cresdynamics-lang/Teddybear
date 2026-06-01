@@ -1,22 +1,15 @@
 import type { MetadataRoute } from "next";
-import { fetchProducts } from "@/lib/actions/catalog";
+import { products } from "@/lib/products";
 import { site } from "@/lib/site";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
   const base = site.url.replace(/\/$/, "");
-  let productPages: MetadataRoute.Sitemap = [];
-
-  try {
-    const products = await fetchProducts();
-    productPages = products.map((p) => ({
-      url: `${base}/shop/${p.slug}`,
-      lastModified: p.createdAt ? new Date(p.createdAt) : new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    }));
-  } catch {
-    productPages = [];
-  }
+  const productPages = products.map((p) => ({
+    url: `${base}/shop/${p.slug}`,
+    lastModified: new Date(p.createdAt),
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }));
 
   return [
     { url: base, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
@@ -24,8 +17,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/custom`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/track`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${base}/cart`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${base}/checkout`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/account`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/wishlist`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/orders`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/login`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
     ...productPages,
   ];
 }
