@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { toastSuccess } from "@/store/toastStore";
+import { whatsappLink } from "@/lib/site";
 
 export default function NewsletterSection() {
   const [email, setEmail] = useState("");
@@ -8,7 +10,13 @@ export default function NewsletterSection() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) setSubmitted(true);
+    if (!email) return;
+    const link = whatsappLink(
+      `Hi BearHug KE, I'd like to join your newsletter and get 10% off my first order. My email: ${email}`
+    );
+    window.open(link, "_blank", "noopener,noreferrer");
+    setSubmitted(true);
+    toastSuccess("Check WhatsApp to confirm your discount request.");
   };
 
   return (
@@ -20,7 +28,9 @@ export default function NewsletterSection() {
         <p className="text-ink-muted mb-6">Join our community of gift-givers across Kenya.</p>
 
         {submitted ? (
-          <p className="text-caramel font-semibold">🧸 Welcome! Check your inbox for your discount code.</p>
+          <p className="text-caramel font-semibold">
+            🧸 Thanks! Send the WhatsApp message to claim your welcome offer.
+          </p>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
             <input

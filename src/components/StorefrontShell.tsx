@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import DeliveryTrustStrip from "@/components/DeliveryTrustStrip";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import WhatsAppFAB from "@/components/WhatsAppFAB";
@@ -18,6 +19,7 @@ export default function StorefrontShell({ children }: { children: React.ReactNod
   return (
     <>
       <Navbar />
+      <DeliveryTrustStrip />
       <main id="main" className="flex-1">
         {children}
       </main>

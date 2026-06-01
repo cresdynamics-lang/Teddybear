@@ -43,4 +43,23 @@
     background-image: radial-gradient(circle at 20% 80%, rgba(139, 94, 60, 0.04) 0%, transparent 50%),
       radial-gradient(circle at 80% 20%, rgba(245, 197, 197, 0.08) 0%, transparent 50%);
   }
+
+  .section-pad {
+    @apply py-14 md:py-20;
+  }
+
+  .toast-enter {
+    animation: toastIn 0.35s ease-out forwards;
+  }
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }

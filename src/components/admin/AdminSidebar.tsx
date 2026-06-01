@@ -15,7 +15,8 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { useAdminStore } from "@/store/adminStore";
+import { useAuthStore } from "@/store/authStore";
+import { signOutUser } from "@/lib/actions/auth";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -29,8 +30,8 @@ const navItems = [
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const logout = useAdminStore((s) => s.logout);
-  const adminName = useAdminStore((s) => s.adminName);
+  const user = useAuthStore((s) => s.user);
+  const clear = useAuthStore((s) => s.clear);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const isActive = (href: string, exact?: boolean) =>
@@ -38,7 +39,6 @@ export default function AdminSidebar() {
 
   return (
     <>
-      {/* Mobile header */}
       <div className="lg:hidden fixed top-0 inset-x-0 z-50 bg-ink text-cream h-14 flex items-center justify-between px-4 border-b border-cream/10">
         <button type="button" onClick={() => setMobileOpen(true)} aria-label="Open menu">
           <Menu className="w-5 h-5" />
@@ -49,7 +49,6 @@ export default function AdminSidebar() {
         </Link>
       </div>
 
-      {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 h-full w-64 bg-ink text-cream z-50 flex flex-col transition-transform lg:translate-x-0 ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
@@ -58,7 +57,7 @@ export default function AdminSidebar() {
         <div className="p-5 border-b border-cream/10 flex items-center justify-between">
           <div>
             <p className="font-display font-semibold">BearHug Admin</p>
-            <p className="text-xs text-cream/50 mt-0.5">{adminName}</p>
+            <p className="text-xs text-cream/50 mt-0.5">{user?.name ?? user?.email ?? "Admin"}</p>
           </div>
           <button
             type="button"
@@ -99,9 +98,11 @@ export default function AdminSidebar() {
           </Link>
           <button
             type="button"
-            onClick={() => {
-              logout();
+            onClick={async () => {
+              await signOutUser();
+              clear();
               router.push("/admin/login");
+              router.refresh();
             }}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-cream/70 hover:bg-red-900/30 hover:text-red-200"
           >

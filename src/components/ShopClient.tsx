@@ -12,7 +12,9 @@ import {
 import { useProducts } from "@/hooks/useCatalog";
 import type { BearColor, BearSize } from "@/types/product";
 import ProductGrid from "./ProductGrid";
+import ProductGridSkeleton from "./ProductGridSkeleton";
 import OccasionStrip from "./OccasionStrip";
+import { useCatalogStore } from "@/store/catalogStore";
 
 const PAGE_SIZE = 9;
 
@@ -30,6 +32,7 @@ export default function ShopClient() {
   const [filterOpen, setFilterOpen] = useState(false);
 
   const allProducts = useProducts();
+  const catalogLoading = useCatalogStore((s) => s.loading);
 
   const filtered = useMemo(
     () =>
@@ -164,7 +167,15 @@ export default function ShopClient() {
           <div className="lg:col-span-3">
             <OccasionStrip selected={occasion} onSelect={setOccasion} />
             <div className="mt-6">
-              <ProductGrid products={paginated} />
+              {catalogLoading ? (
+                <ProductGridSkeleton count={9} />
+              ) : (
+                <ProductGrid
+                  products={paginated}
+                  emptyTitle="No bears match your filters"
+                  emptyDescription="Adjust filters or browse all products to find your perfect bear."
+                />
+              )}
             </div>
             {hasMore && (
               <div className="text-center mt-8">

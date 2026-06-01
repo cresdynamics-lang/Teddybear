@@ -61,3 +61,7 @@ export function orderStatusIndex(status: OrderStatus): number {
   };
   return map[status];
 }
+
+export function getOrderProgress(status: OrderStatus): number {
+  return orderStatusIndex(status);
+}

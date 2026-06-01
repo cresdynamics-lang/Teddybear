@@ -3,9 +3,33 @@
 import { useState } from "react";
 import { MapPin, MessageCircle, Phone, Mail, CreditCard, ArrowUpRight } from "lucide-react";
 import { site, whatsappLink } from "@/lib/site";
+import { toastSuccess } from "@/store/toastStore";
 
 export default function ContactPage() {
   const [sent, setSent] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const text = [
+      `Hi BearHug KE,`,
+      ``,
+      `Name: ${name}`,
+      `Email: ${email}`,
+      phone ? `Phone: ${phone}` : "",
+      ``,
+      message,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    window.open(whatsappLink(text), "_blank", "noopener,noreferrer");
+    setSent(true);
+    toastSuccess("Opening WhatsApp — send the message to reach us instantly.");
+  };
 
   return (
     <div>
@@ -18,7 +42,8 @@ export default function ContactPage() {
             We&apos;d love to hear from you
           </h1>
           <p className="text-ink-muted text-base md:text-lg leading-relaxed max-w-xl">
-            Need help choosing the right size? WhatsApp us for the fastest reply — we typically respond within minutes.
+            Need help choosing the right size? WhatsApp us for the fastest reply — we typically
+            respond within minutes.
           </p>
         </div>
       </div>
@@ -78,8 +103,8 @@ export default function ContactPage() {
                 ),
               },
             ].map(({ icon: Icon, title, body }) => (
-              <div key={title} className="flex gap-4 p-5 rounded-2xl bg-cream-dark">
-                <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-card">
+              <div key={title} className="flex gap-4 p-5 rounded-2xl bg-white shadow-card">
+                <div className="w-10 h-10 rounded-2xl bg-caramel/10 flex items-center justify-center shrink-0">
                   <Icon className="w-5 h-5 text-caramel" strokeWidth={1.5} />
                 </div>
                 <div>
@@ -93,38 +118,63 @@ export default function ContactPage() {
           <div className="lg:col-span-3">
             <div className="bg-white rounded-3xl shadow-card p-8 md:p-10">
               {sent ? (
-                <div className="text-center py-16">
+                <div className="text-center py-12">
                   <p className="text-5xl mb-5">🧸</p>
-                  <h2 className="font-display text-2xl font-medium text-ink mb-2">Message sent!</h2>
-                  <p className="text-ink-muted">We&apos;ll get back to you within 24 hours.</p>
+                  <h2 className="font-display text-2xl font-medium text-ink mb-2">Almost done!</h2>
+                  <p className="text-ink-muted mb-6">
+                    Send the pre-filled message in WhatsApp and our team will reply shortly.
+                  </p>
+                  <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" className="btn-primary">
+                    Open WhatsApp again
+                  </a>
                 </div>
               ) : (
                 <>
                   <h2 className="font-display text-2xl font-medium text-ink mb-2">Send a message</h2>
                   <p className="text-ink-muted text-sm mb-8">
-                    Tell us the occasion, preferred size, and colour — we&apos;ll recommend the perfect bear.
+                    Tell us the occasion, preferred size, and colour — we&apos;ll recommend the perfect
+                    bear. Submitting opens WhatsApp with your details ready to send.
                   </p>
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      setSent(true);
-                    }}
-                    className="space-y-4"
-                  >
+                  <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid sm:grid-cols-2 gap-4">
-                      <input required className="input-field" placeholder="Your name" aria-label="Name" />
-                      <input required type="email" className="input-field" placeholder="Email" aria-label="Email" />
+                      <input
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="input-field"
+                        placeholder="Your name"
+                        aria-label="Name"
+                      />
+                      <input
+                        required
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="input-field"
+                        placeholder="Email"
+                        aria-label="Email"
+                      />
                     </div>
-                    <input type="tel" className="input-field" placeholder="Phone (07XX XXX XXX)" aria-label="Phone" />
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="input-field"
+                      placeholder="Phone (07XX XXX XXX)"
+                      aria-label="Phone"
+                    />
                     <textarea
                       required
                       rows={5}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
                       className="input-field resize-none"
                       placeholder="Which teddy bear size or colour do you need? Any name for embroidery?"
                       aria-label="Message"
                     />
-                    <button type="submit" className="btn-primary w-full sm:w-auto">
-                      Send message
+                    <button type="submit" className="btn-primary w-full sm:w-auto inline-flex items-center gap-2">
+                      <MessageCircle className="w-4 h-4" />
+                      Send via WhatsApp
                     </button>
                   </form>
                 </>
@@ -133,9 +183,9 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <div className="mt-16 rounded-4xl overflow-hidden h-80 shadow-card">
+        <div className="mt-16 rounded-3xl overflow-hidden h-80 shadow-card">
           <iframe
-            title="Teddy Bear Kenya location"
+            title="BearHug KE location"
             src="https://maps.google.com/maps?q=Yala+Towers+Nairobi+CBD&t=&z=15&ie=UTF8&iwloc=&output=embed"
             className="w-full h-full border-0"
             loading="lazy"

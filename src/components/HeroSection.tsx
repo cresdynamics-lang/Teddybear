@@ -47,10 +47,10 @@ export default function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="text-lg text-ink-muted mb-8 max-w-lg"
+            className="text-lg text-ink-muted mb-8 max-w-lg leading-relaxed"
           >
-            Handpicked teddy bears delivered across Kenya. Same-day Nairobi delivery. M-Pesa
-            accepted.
+            Premium plush bears for every occasion — same-day delivery in Nairobi, trusted
+            nationwide shipping, and secure M-Pesa checkout.
           </motion.p>
 
           <motion.div

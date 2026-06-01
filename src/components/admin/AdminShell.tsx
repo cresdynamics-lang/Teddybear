@@ -2,30 +2,41 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useAdminStore } from "@/store/adminStore";
+import { useAuthStore } from "@/store/authStore";
+import { checkIsAdmin } from "@/lib/actions/admin";
 import AdminSidebar from "./AdminSidebar";
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const isAuthenticated = useAdminStore((s) => s.isAuthenticated);
-  const [mounted, setMounted] = useState(false);
+  const isAdmin = useAuthStore((s) => s.isAdmin);
+  const authLoaded = useAuthStore((s) => s.loaded);
+  const [checking, setChecking] = useState(true);
+  const [allowed, setAllowed] = useState(false);
 
   const isLoginPage = pathname === "/admin/login";
 
-  useEffect(() => setMounted(true), []);
-
   useEffect(() => {
-    if (!mounted) return;
-    if (!isAuthenticated && !isLoginPage) {
-      router.replace("/admin/login");
-    }
-    if (isAuthenticated && isLoginPage) {
-      router.replace("/admin");
-    }
-  }, [mounted, isAuthenticated, isLoginPage, router]);
+    if (!authLoaded) return;
 
-  if (!mounted) {
+    async function verify() {
+      if (isLoginPage) {
+        const ok = await checkIsAdmin();
+        if (ok) router.replace("/admin");
+        setChecking(false);
+        return;
+      }
+
+      const ok = await checkIsAdmin();
+      setAllowed(ok);
+      setChecking(false);
+      if (!ok) router.replace("/admin/login");
+    }
+
+    verify();
+  }, [authLoaded, isLoginPage, router, isAdmin]);
+
+  if (!authLoaded || checking) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center text-ink-muted">
         Loading admin…
@@ -37,7 +48,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     return <>{children}</>;
   }
 
-  if (!isAuthenticated) return null;
+  if (!allowed) return null;
 
   return (
     <div className="min-h-screen bg-gray-50">
