@@ -8,6 +8,7 @@ import CartDrawer from "@/components/CartDrawer";
 import WhatsAppFAB from "@/components/WhatsAppFAB";
 import MobileNav from "@/components/MobileNav";
 import CookieConsent from "@/components/CookieConsent";
+import RouteProgressBar from "@/components/loading/RouteProgressBar";
 
 export default function StorefrontShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -19,9 +20,10 @@ export default function StorefrontShell({ children }: { children: React.ReactNod
 
   return (
     <>
+      <RouteProgressBar />
       <Navbar />
       <DeliveryTrustStrip />
-      <main id="main" className="flex-1">
+      <main id="main" className="flex-1 page-enter">
         {children}
       </main>
       <Footer />

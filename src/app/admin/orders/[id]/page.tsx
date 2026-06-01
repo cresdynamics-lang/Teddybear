@@ -35,7 +35,13 @@ export default function AdminOrderDetailPage() {
   };
 
   if (loading) {
-    return <div className="text-ink-muted py-12">Loading order…</div>;
+    return (
+      <div className="animate-pulse space-y-6 py-4 max-w-3xl">
+        <div className="h-8 w-48 rounded-lg bg-caramel/10 skeleton-shimmer" />
+        <div className="h-40 rounded-2xl bg-caramel/5 skeleton-shimmer" />
+        <div className="h-24 rounded-2xl bg-caramel/5 skeleton-shimmer" />
+      </div>
+    );
   }
 
   if (!order) {

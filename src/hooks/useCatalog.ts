@@ -6,6 +6,14 @@ export function useProducts() {
   return useCatalogStore((s) => s.products);
 }
 
+export function useCatalogLoaded() {
+  return useCatalogStore((s) => s.loaded);
+}
+
+export function useCatalogLoading() {
+  return useCatalogStore((s) => s.loading);
+}
+
 export function useTestimonials() {
   return useCatalogStore((s) => s.testimonials);
 }

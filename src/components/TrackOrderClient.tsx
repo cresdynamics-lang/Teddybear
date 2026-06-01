@@ -5,7 +5,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Loader2, Check, PackageX } from "lucide-react";
+import { Check, PackageX } from "lucide-react";
+import LoadingSpinner from "@/components/loading/LoadingSpinner";
+import BearLoader from "@/components/loading/BearLoader";
 import { trackOrderSchema, type TrackOrderSchema } from "@/lib/validators";
 import { fetchOrderByRef, fetchUserOrders } from "@/lib/actions/orders";
 import { getOrderProgress } from "@/store/authStore";
@@ -195,14 +197,7 @@ export default function TrackOrderClient() {
           {errors.phone && <p className="text-red-600 text-xs mt-1">{errors.phone.message}</p>}
         </div>
         <button type="submit" disabled={loading} className="btn-primary w-full">
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin inline mr-2" />
-              Searching…
-            </>
-          ) : (
-            "Track Order"
-          )}
+          {loading ? <LoadingSpinner label="Searching…" size="md" /> : "Track Order"}
         </button>
 
         {!user && (
@@ -215,7 +210,14 @@ export default function TrackOrderClient() {
         )}
       </form>
 
-      {notFound && (
+      {loading && !tracked && (
+        <div className="mt-8 flex flex-col items-center">
+          <BearLoader size="sm" showRings={false} />
+          <p className="text-sm text-ink-muted mt-3">Finding your order…</p>
+        </div>
+      )}
+
+      {notFound && !loading && (
         <div className="mt-6 p-4 rounded-2xl bg-red-50 text-red-700 text-sm flex items-start gap-3">
           <PackageX className="w-5 h-5 shrink-0 mt-0.5" />
           <div>

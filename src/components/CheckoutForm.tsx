@@ -4,7 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, CheckCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
+import LoadingSpinner from "@/components/loading/LoadingSpinner";
+import FadeIn from "@/components/loading/FadeIn";
 import { checkoutSchema, type CheckoutSchema } from "@/lib/validators";
 import { KENYA_COUNTIES, isNairobiCounty } from "@/lib/counties";
 import { useCartStore } from "@/store/cartStore";
@@ -83,7 +85,7 @@ export default function CheckoutForm() {
 
   if (confirmed) {
     return (
-      <div className="text-center py-16 max-w-md mx-auto">
+      <FadeIn className="text-center py-16 max-w-md mx-auto">
         <CheckCircle className="w-16 h-16 text-mpesa mx-auto mb-4" />
         <h2 className="font-display text-2xl font-medium mb-2">Order confirmed!</h2>
         <p className="text-ink-muted mb-4">
@@ -104,7 +106,7 @@ export default function CheckoutForm() {
             Continue Shopping
           </a>
         </div>
-      </div>
+      </FadeIn>
     );
   }
 
@@ -234,13 +236,7 @@ export default function CheckoutForm() {
         </section>
 
         <button type="submit" disabled={loading} className="btn-mpesa w-full lg:hidden">
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" /> Placing Order…
-            </>
-          ) : (
-            "Place Order"
-          )}
+          {loading ? <LoadingSpinner label="Placing order…" size="md" /> : "Place Order"}
         </button>
       </div>
 
@@ -277,13 +273,7 @@ export default function CheckoutForm() {
             </div>
           </div>
           <button type="submit" disabled={loading} className="btn-mpesa w-full hidden lg:flex">
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" /> Placing Order…
-              </>
-            ) : (
-              "Place Order"
-            )}
+            {loading ? <LoadingSpinner label="Placing order…" size="md" /> : "Place Order"}
           </button>
         </div>
       </aside>

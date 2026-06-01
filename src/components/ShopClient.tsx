@@ -9,7 +9,9 @@ import {
   OCCASIONS,
   filterProducts,
 } from "@/lib/products";
-import { useProducts } from "@/hooks/useCatalog";
+import { useCatalogLoading, useProducts } from "@/hooks/useCatalog";
+import ProductGridSkeleton from "@/components/loading/ProductGridSkeleton";
+import FadeIn from "@/components/loading/FadeIn";
 import type { BearColor, BearSize } from "@/types/product";
 import ProductGrid from "./ProductGrid";
 import OccasionStrip from "./OccasionStrip";
@@ -30,6 +32,7 @@ export default function ShopClient() {
   const [filterOpen, setFilterOpen] = useState(false);
 
   const allProducts = useProducts();
+  const catalogLoading = useCatalogLoading();
 
   useEffect(() => {
     setOccasion(occasionParam);
@@ -169,11 +172,17 @@ export default function ShopClient() {
           <div className="lg:col-span-3">
             <OccasionStrip selected={occasion} onSelect={setOccasion} />
             <div className="mt-6">
-              <ProductGrid
-                products={paginated}
-                emptyTitle="No bears match your filters"
-                emptyDescription="Adjust filters or browse all products to find your perfect bear."
-              />
+              {catalogLoading ? (
+                <ProductGridSkeleton count={9} />
+              ) : (
+                <FadeIn>
+                  <ProductGrid
+                    products={paginated}
+                    emptyTitle="No bears match your filters"
+                    emptyDescription="Adjust filters or browse all products to find your perfect bear."
+                  />
+                </FadeIn>
+              )}
             </div>
             {hasMore && (
               <div className="text-center mt-8">

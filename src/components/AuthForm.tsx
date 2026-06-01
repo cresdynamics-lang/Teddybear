@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import LoadingSpinner from "@/components/loading/LoadingSpinner";
 import {
   loginSchema,
   registerSchema,
@@ -192,7 +192,7 @@ export default function AuthForm() {
                   )}
                 </div>
                 <button type="submit" disabled={loading} className="btn-primary w-full">
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In"}
+                  {loading ? <LoadingSpinner label="Signing in…" /> : "Sign In"}
                 </button>
               </form>
             ) : (
@@ -258,7 +258,7 @@ export default function AuthForm() {
                   <p className="text-red-600 text-xs">{registerForm.formState.errors.acceptTerms.message}</p>
                 )}
                 <button type="submit" disabled={loading} className="btn-primary w-full">
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Account"}
+                  {loading ? <LoadingSpinner label="Creating account…" /> : "Create Account"}
                 </button>
               </form>
             )}

@@ -51,8 +51,8 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          scrolled ? "glass-nav shadow-sm" : "bg-cream"
+        className={`sticky top-0 z-50 transition-all duration-500 ease-out ${
+          scrolled ? "glass-nav shadow-soft" : "bg-cream shadow-none"
         }`}
       >
         <div className="container-main flex items-center justify-between h-16 md:h-18">

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { checkIsAdmin } from "@/lib/actions/admin";
 import AdminSidebar from "./AdminSidebar";
+import PageLoader from "@/components/PageLoader";
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -42,8 +43,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   if (!authLoaded || checking || !mounted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center text-ink-muted">
-        Loading admin…
+      <div className="min-h-screen bg-gray-50">
+        <PageLoader label="Loading admin panel…" full={false} />
       </div>
     );
   }

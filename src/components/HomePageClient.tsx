@@ -10,10 +10,13 @@ import TestimonialCarousel from "@/components/TestimonialCarousel";
 import InstagramSection from "@/components/InstagramSection";
 import CustomBearCTA from "@/components/CustomBearCTA";
 import TrustBar from "@/components/TrustBar";
-import { useFilteredProducts } from "@/hooks/useCatalog";
+import { useCatalogLoading, useFilteredProducts } from "@/hooks/useCatalog";
+import ProductGridSkeleton from "@/components/loading/ProductGridSkeleton";
+import FadeIn from "@/components/loading/FadeIn";
 
 export default function HomePageClient() {
   const [occasion, setOccasion] = useState("All");
+  const catalogLoading = useCatalogLoading();
   const products = useFilteredProducts({ occasion, sort: "featured" }).slice(0, 6);
 
   return (
@@ -22,12 +25,20 @@ export default function HomePageClient() {
       <TrustBar />
       <section className="py-8">
         <div className="container-main">
-          <h2 className="font-display text-2xl md:text-3xl font-medium text-ink mb-4">
-            Shop by Occasion
-          </h2>
-          <OccasionStrip selected={occasion} onSelect={setOccasion} />
+          <FadeIn>
+            <h2 className="font-display text-2xl md:text-3xl font-medium text-ink mb-4">
+              Shop by Occasion
+            </h2>
+            <OccasionStrip selected={occasion} onSelect={setOccasion} />
+          </FadeIn>
           <div className="mt-8">
-            <ProductGrid products={products} />
+            {catalogLoading ? (
+              <ProductGridSkeleton count={6} columns="home" />
+            ) : (
+              <FadeIn delay={0.08}>
+                <ProductGrid products={products} />
+              </FadeIn>
+            )}
           </div>
         </div>
       </section>

@@ -51,6 +51,27 @@
   .toast-enter {
     animation: toastIn 0.35s ease-out forwards;
   }
+
+  .skeleton-shimmer {
+    background-size: 200% 100%;
+    background-image: linear-gradient(
+      90deg,
+      rgba(139, 94, 60, 0.06) 0%,
+      rgba(245, 197, 197, 0.35) 50%,
+      rgba(139, 94, 60, 0.06) 100%
+    );
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+
+  .page-enter {
+    animation: fadeIn 0.45s ease-out forwards;
+  }
+
+  .btn-primary:active:not(:disabled),
+  .btn-outline:active:not(:disabled),
+  .btn-mpesa:active:not(:disabled) {
+    transform: scale(0.98);
+  }
 }
 
 @keyframes toastIn {
@@ -61,5 +82,14 @@
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }

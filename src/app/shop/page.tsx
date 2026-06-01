@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import ShopClient from "@/components/ShopClient";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "Shop Bears | BearHug KE",
@@ -8,7 +9,7 @@ export const metadata = {
 
 export default function ShopPage() {
   return (
-    <Suspense fallback={<div className="container-main py-16 text-center">Loading shop…</div>}>
+    <Suspense fallback={<PageLoader label="Opening the shop…" compact />}>
       <ShopClient />
     </Suspense>
   );

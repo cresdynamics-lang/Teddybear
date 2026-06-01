@@ -45,6 +45,8 @@ const config: Config = {
       animation: {
         pulseMpesa: "pulseMpesa 2s ease-in-out infinite",
         bounceHeart: "bounceHeart 0.4s ease",
+        shimmer: "shimmer 1.6s ease-in-out infinite",
+        fadeIn: "fadeIn 0.45s ease-out forwards",
       },
       keyframes: {
         pulseMpesa: {
@@ -54,6 +56,14 @@ const config: Config = {
         bounceHeart: {
           "0%, 100%": { transform: "scale(1)" },
           "50%": { transform: "scale(1.3)" },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "200% 0" },
+          "100%": { backgroundPosition: "-200% 0" },
+        },
+        fadeIn: {
+          from: { opacity: "0", transform: "translateY(10px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
         },
       },
     },
