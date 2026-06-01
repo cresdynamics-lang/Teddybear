@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import TrackOrderClient from "@/components/TrackOrderClient";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "Track Order | BearHug KE",
@@ -6,5 +8,9 @@ export const metadata = {
 };
 
 export default function TrackPage() {
-  return <TrackOrderClient />;
+  return (
+    <Suspense fallback={<PageLoader label="Loading track order…" compact />}>
+      <TrackOrderClient />
+    </Suspense>
+  );
 }

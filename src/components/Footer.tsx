@@ -64,8 +64,7 @@ export default function Footer() {
         <div className="border-t border-cream/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-4">
             <span className="bg-mpesa text-white text-xs font-bold px-3 py-1.5 rounded">M-PESA</span>
-            <span className="text-xs text-cream/60">Visa</span>
-            <span className="text-xs text-cream/60">Mastercard</span>
+            <span className="text-xs text-cream/60">Pay on delivery (select areas)</span>
           </div>
           <div className="flex flex-col md:items-end gap-2 text-sm text-cream/60">
             <p>© 2026 {site.name}. Made with 🧸 in Nairobi.</p>

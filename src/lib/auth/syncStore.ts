@@ -3,6 +3,7 @@
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { getCurrentUser, getWishlistProductIds } from "@/lib/actions/auth";
 import { checkIsAdmin } from "@/lib/actions/admin";
+import { linkOrdersToUserByPhone } from "@/lib/actions/orders";
 import { useAuthStore } from "@/store/authStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 
@@ -14,6 +15,7 @@ function delay(ms: number) {
 export async function loadAuthIntoStore(attempts = 4): Promise<boolean> {
   const { setUser, setIsAdmin, clear, setLoaded } = useAuthStore.getState();
   const setWishlistIds = useWishlistStore.getState().setIds;
+  const guestWishlistIds = [...useWishlistStore.getState().ids];
 
   if (!isSupabaseConfigured()) {
     setLoaded(true);
@@ -27,13 +29,17 @@ export async function loadAuthIntoStore(attempts = 4): Promise<boolean> {
       await supabase.auth.getSession();
       const user = await getCurrentUser();
       if (user) {
-        const [isAdmin, wishlistIds] = await Promise.all([
+        await linkOrdersToUserByPhone();
+        const [isAdmin, serverWishlistIds] = await Promise.all([
           checkIsAdmin(),
           getWishlistProductIds(),
         ]);
         setUser(user);
         setIsAdmin(isAdmin);
-        setWishlistIds(wishlistIds);
+        const mergedWishlist = Array.from(
+          new Set([...serverWishlistIds, ...guestWishlistIds])
+        );
+        setWishlistIds(mergedWishlist);
         return true;
       }
     } catch {

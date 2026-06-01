@@ -31,8 +31,31 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  // Refresh session cookies on each navigation (keeps sign-in stable).
-  await supabase.auth.getSession();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const pathname = request.nextUrl.pathname;
+
+  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
+    if (!user) {
+      const login = new URL("/admin/login", request.url);
+      login.searchParams.set("next", pathname);
+      return NextResponse.redirect(login);
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profile?.role !== "admin") {
+      const login = new URL("/admin/login", request.url);
+      return NextResponse.redirect(login);
+    }
+  }
+
   return response;
 }
 

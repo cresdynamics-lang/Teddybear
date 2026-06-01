@@ -12,8 +12,12 @@ import { refreshCatalog } from "@/lib/refreshCatalog";
 import { toastError, toastSuccess } from "@/store/toastStore";
 import type { Testimonial } from "@/types/admin";
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export default function AdminTestimonialsPage() {
-  const testimonials = useCatalogStore((s) => s.testimonials);
+  const testimonials = useCatalogStore((s) => s.testimonials).filter((t) => UUID_RE.test(t.id));
+  const testimonialsFromDatabase = useCatalogStore((s) => s.testimonialsFromDatabase);
   const [editing, setEditing] = useState<Testimonial | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -78,6 +82,11 @@ export default function AdminTestimonialsPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-display font-semibold text-ink">Testimonials</h1>
         <p className="text-ink-muted text-sm mt-1">{testimonials.length} customer reviews</p>
+        {!testimonialsFromDatabase && (
+          <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mt-4">
+            Showing demo reviews only. Seed your catalog in Settings to persist testimonials in Supabase.
+          </p>
+        )}
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">

@@ -88,13 +88,16 @@ export default function CheckoutForm() {
         <h2 className="font-display text-2xl font-medium mb-2">Order confirmed!</h2>
         <p className="text-ink-muted mb-4">
           Your order <strong className="text-caramel">{orderId}</strong> has been received.
-          We&apos;ve sent a confirmation to your phone.
+          Our team will contact you shortly to confirm payment and delivery.
         </p>
         <p className="text-sm text-ink-muted mb-6">
-          Save your order number — you&apos;ll need it with your phone number to track delivery.
+          Save your order number — use it with your phone number on the track page to follow delivery.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <a href={`/track`} className="btn-primary">
+          <a
+            href={`/track?order=${encodeURIComponent(orderId)}`}
+            className="btn-primary"
+          >
             Track Order
           </a>
           <a href="/shop" className="btn-outline">

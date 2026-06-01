@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { useParams } from "next/navigation";
-import { fetchAllOrders, updateOrderStatus } from "@/lib/actions/orders";
+import { fetchOrderById, updateOrderStatus } from "@/lib/actions/orders";
 import { toastError, toastSuccess } from "@/store/toastStore";
 import { formatKES } from "@/lib/format";
 import type { Order, OrderStatus } from "@/types/order";
@@ -18,8 +18,8 @@ export default function AdminOrderDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAllOrders()
-      .then((orders) => setOrder(orders.find((o) => o.id === orderId) ?? null))
+    fetchOrderById(orderId)
+      .then(setOrder)
       .finally(() => setLoading(false));
   }, [orderId]);
 

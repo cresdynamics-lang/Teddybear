@@ -9,10 +9,14 @@ interface CatalogState {
   settings: SiteSettings;
   loaded: boolean;
   loading: boolean;
+  productsFromDatabase: boolean;
+  testimonialsFromDatabase: boolean;
   hydrate: (data: {
     products: Product[];
     testimonials: Testimonial[];
     settings: SiteSettings;
+    productsFromDatabase?: boolean;
+    testimonialsFromDatabase?: boolean;
   }) => void;
   setProducts: (products: Product[]) => void;
   setTestimonials: (testimonials: Testimonial[]) => void;
@@ -42,18 +46,22 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
   settings: defaultSiteSettings,
   loaded: false,
   loading: true,
+  productsFromDatabase: false,
+  testimonialsFromDatabase: false,
 
   hydrate: (data) =>
     set({
       products: data.products,
       testimonials: data.testimonials,
       settings: data.settings,
+      productsFromDatabase: data.productsFromDatabase ?? false,
+      testimonialsFromDatabase: data.testimonialsFromDatabase ?? false,
       loaded: true,
       loading: false,
     }),
 
-  setProducts: (products) => set({ products }),
-  setTestimonials: (testimonials) => set({ testimonials }),
+  setProducts: (products) => set({ products, productsFromDatabase: true }),
+  setTestimonials: (testimonials) => set({ testimonials, testimonialsFromDatabase: true }),
   setSettings: (settings) => set({ settings }),
   setLoading: (loading) => set({ loading }),
 

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { fetchProducts, fetchSiteSettings, fetchTestimonials } from "@/lib/actions/catalog";
-import { useCatalogStore } from "@/store/catalogStore";
+import { fetchCatalogBundle } from "@/lib/actions/catalog";
+import { useCatalogStore, defaultSiteSettings } from "@/store/catalogStore";
+import { DEFAULT_PRODUCTS, DEFAULT_TESTIMONIALS } from "@/lib/products";
 
 export default function CatalogProvider({ children }: { children: React.ReactNode }) {
   const hydrate = useCatalogStore((s) => s.hydrate);
@@ -14,14 +15,18 @@ export default function CatalogProvider({ children }: { children: React.ReactNod
     async function load() {
       setLoading(true);
       try {
-        const [products, testimonials, settings] = await Promise.all([
-          fetchProducts(),
-          fetchTestimonials(),
-          fetchSiteSettings(),
-        ]);
-        if (!cancelled) hydrate({ products, testimonials, settings });
+        const bundle = await fetchCatalogBundle();
+        if (!cancelled) hydrate(bundle);
       } catch {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          hydrate({
+            products: DEFAULT_PRODUCTS,
+            testimonials: DEFAULT_TESTIMONIALS,
+            settings: defaultSiteSettings,
+            productsFromDatabase: false,
+            testimonialsFromDatabase: false,
+          });
+        }
       }
     }
 

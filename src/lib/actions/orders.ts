@@ -10,6 +10,8 @@ import type { OrderShipping, PaymentMethod } from "@/types/order";
 import { generateOrderId } from "@/types/order";
 import { normalizePhone } from "@/lib/validators";
 
+const MAX_ORDER_ID_ATTEMPTS = 8;
+
 export async function createOrder(payload: {
   items: CartLineItem[];
   shipping: OrderShipping;
@@ -24,11 +26,9 @@ export async function createOrder(payload: {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const orderId = generateOrderId();
   const phone = normalizePhone(payload.shipping.phone);
 
   const row = {
-    id: orderId,
     user_id: user?.id ?? null,
     phone,
     status: "received" as const,
@@ -41,27 +41,108 @@ export async function createOrder(payload: {
     items: payload.items,
   };
 
-  const { data, error } = await supabase.from("orders").insert(row).select().single();
-  if (error) throw new Error(error.message);
+  let lastError: string | null = null;
 
-  revalidatePath("/orders");
-  revalidatePath("/admin/orders");
+  for (let attempt = 0; attempt < MAX_ORDER_ID_ATTEMPTS; attempt++) {
+    const orderId = generateOrderId();
+    const { data, error } = await supabase
+      .from("orders")
+      .insert({ ...row, id: orderId })
+      .select()
+      .single();
+
+    if (!error && data) {
+      revalidatePath("/orders");
+      revalidatePath("/admin/orders");
+      return mapOrder(data);
+    }
+
+    if (error?.code === "23505") continue;
+    lastError = error?.message ?? "Could not create order";
+    break;
+  }
+
+  throw new Error(lastError ?? "Could not create order. Please try again.");
+}
+
+/** Guest-safe tracking: validates order id + phone via service role (no broad exposure). */
+export async function fetchOrderByRef(orderNumber: string, phone: string): Promise<Order | null> {
+  const id = orderNumber.trim().toUpperCase();
+  const normalized = normalizePhone(phone);
+  if (!id || !normalized) return null;
+
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("orders")
+      .select("*")
+      .eq("id", id)
+      .eq("phone", normalized)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return mapOrder(data);
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchOrderById(orderId: string): Promise<Order | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profile?.role !== "admin") return null;
+
+  const admin = createAdminClient();
+  const { data, error } = await admin.from("orders").select("*").eq("id", orderId).maybeSingle();
+  if (error || !data) return null;
   return mapOrder(data);
 }
 
-export async function fetchOrderByRef(orderNumber: string, phone: string): Promise<Order | null> {
+/** Attach guest orders (same phone) when a customer signs in. */
+export async function linkOrdersToUserByPhone(): Promise<number> {
   const supabase = await createClient();
-  const normalized = normalizePhone(phone);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return 0;
 
-  const { data, error } = await supabase
-    .from("orders")
-    .select("*")
-    .eq("id", orderNumber.trim())
-    .eq("phone", normalized)
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("phone")
+    .eq("id", user.id)
     .maybeSingle();
 
-  if (error || !data) return null;
-  return mapOrder(data);
+  const phone = profile?.phone ? normalizePhone(profile.phone) : "";
+  if (!phone) return 0;
+
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("orders")
+      .update({ user_id: user.id })
+      .is("user_id", null)
+      .eq("phone", phone)
+      .select("id");
+
+    if (error) return 0;
+    if ((data?.length ?? 0) > 0) {
+      revalidatePath("/orders");
+      revalidatePath("/account");
+    }
+    return data?.length ?? 0;
+  } catch {
+    return 0;
+  }
 }
 
 export async function fetchUserOrders(): Promise<Order[]> {
@@ -83,20 +164,23 @@ export async function fetchUserOrders(): Promise<Order[]> {
 
 export async function fetchAllOrders(): Promise<Order[]> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", (await supabase.auth.getUser()).data.user?.id ?? "")
+    .eq("id", user.id)
     .maybeSingle();
 
   if (profile?.role !== "admin") {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
-    const { data } = await supabase.from("orders").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-    return (data ?? []).map(mapOrder);
+    return fetchUserOrders();
   }
 
-  const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+  const admin = createAdminClient();
+  const { data, error } = await admin.from("orders").select("*").order("created_at", { ascending: false });
   if (error) return [];
   return (data ?? []).map(mapOrder);
 }

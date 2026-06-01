@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { SlidersHorizontal, X } from "lucide-react";
 import {
@@ -18,9 +18,9 @@ const PAGE_SIZE = 9;
 
 export default function ShopClient() {
   const searchParams = useSearchParams();
-  const initialOccasion = searchParams.get("occasion") || "All";
+  const occasionParam = searchParams.get("occasion") || "All";
 
-  const [occasion, setOccasion] = useState(initialOccasion);
+  const [occasion, setOccasion] = useState(occasionParam);
   const [sizes, setSizes] = useState<BearSize[]>([]);
   const [colors, setColors] = useState<BearColor[]>([]);
   const [minPrice, setMinPrice] = useState(500);
@@ -30,6 +30,11 @@ export default function ShopClient() {
   const [filterOpen, setFilterOpen] = useState(false);
 
   const allProducts = useProducts();
+
+  useEffect(() => {
+    setOccasion(occasionParam);
+    setPage(1);
+  }, [occasionParam]);
 
   const filtered = useMemo(
     () =>

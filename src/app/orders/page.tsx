@@ -124,7 +124,10 @@ export default function OrdersPage() {
               <span>·</span>
               <span>{order.shipping.county}</span>
               <span>·</span>
-              <Link href="/track" className="text-caramel font-medium hover:underline ml-auto">
+              <Link
+                href={`/track?order=${encodeURIComponent(order.id)}`}
+                className="text-caramel font-medium hover:underline ml-auto"
+              >
                 Track order
               </Link>
             </div>

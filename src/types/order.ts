@@ -52,6 +52,10 @@ export function generateOrderId(): string {
   return `BH-${num}`;
 }
 
+export function normalizeOrderId(id: string): string {
+  return id.trim().toUpperCase();
+}
+
 export function orderStatusIndex(status: OrderStatus): number {
   const map: Record<OrderStatus, number> = {
     received: 0,

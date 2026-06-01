@@ -23,13 +23,18 @@ export default function MobileNav() {
           const active = pathname === href || (href === "/shop" && pathname.startsWith("/shop"));
           if (isCart) {
             return (
-              <button
+              <Link
                 key={href}
-                type="button"
-                onClick={toggleCart}
+                href={href}
                 className={`flex flex-col items-center justify-center gap-0.5 min-w-[64px] min-h-[44px] ${
                   active ? "text-caramel" : "text-ink-muted"
                 }`}
+                onClick={(e) => {
+                  if (itemCount > 0 && pathname !== "/cart") {
+                    e.preventDefault();
+                    toggleCart();
+                  }
+                }}
               >
                 <span className="relative">
                   <Icon className="w-5 h-5" />
@@ -40,7 +45,7 @@ export default function MobileNav() {
                   )}
                 </span>
                 <span className="text-[10px] font-medium">{label}</span>
-              </button>
+              </Link>
             );
           }
           return (

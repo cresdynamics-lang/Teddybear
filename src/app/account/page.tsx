@@ -23,6 +23,7 @@ import { site } from "@/lib/site";
 import { formatKES } from "@/lib/format";
 import PageLoader from "@/components/PageLoader";
 import EmptyState from "@/components/EmptyState";
+import AccountProfileForm from "@/components/AccountProfileForm";
 import type { Order } from "@/types/order";
 
 export default function AccountPage() {
@@ -87,6 +88,8 @@ export default function AccountPage() {
           Sign Out
         </button>
       </div>
+
+      <AccountProfileForm />
 
       <div className="grid grid-cols-3 gap-3 mb-8">
         {[

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Loader2, Check, PackageX } from "lucide-react";
 import { trackOrderSchema, type TrackOrderSchema } from "@/lib/validators";
 import { fetchOrderByRef, fetchUserOrders } from "@/lib/actions/orders";
@@ -21,6 +22,7 @@ const STEPS = [
 ] as const;
 
 export default function TrackOrderClient() {
+  const searchParams = useSearchParams();
   const user = useAuthStore((s) => s.user);
   const authLoaded = useAuthStore((s) => s.loaded);
   const [myOrders, setMyOrders] = useState<Order[]>([]);
@@ -38,27 +40,15 @@ export default function TrackOrderClient() {
     formState: { errors },
   } = useForm<TrackOrderSchema>({
     resolver: zodResolver(trackOrderSchema),
-    defaultValues: { orderNumber: "", phone: "" },
+    defaultValues: {
+      orderNumber: searchParams.get("order")?.toUpperCase() ?? "",
+      phone: "",
+    },
   });
 
   const selectedOrderId = watch("orderNumber");
 
-  useEffect(() => {
-    if (!authLoaded || !user) {
-      setMyOrders([]);
-      return;
-    }
-    setOrdersLoading(true);
-    if (user.phone) setValue("phone", user.phone);
-    fetchUserOrders()
-      .then((orders) => {
-        setMyOrders(orders);
-        if (orders.length > 0) setValue("orderNumber", orders[0].id);
-      })
-      .finally(() => setOrdersLoading(false));
-  }, [authLoaded, user, setValue]);
-
-  const trackOrder = async (orderNumber: string, phone: string) => {
+  const trackOrder = useCallback(async (orderNumber: string, phone: string) => {
     setLoading(true);
     setNotFound(false);
     const found = await fetchOrderByRef(orderNumber, phone);
@@ -72,7 +62,30 @@ export default function TrackOrderClient() {
       setTracked(false);
       setNotFound(true);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!authLoaded || !user) {
+      setMyOrders([]);
+      return;
+    }
+    setOrdersLoading(true);
+    if (user.phone) setValue("phone", user.phone);
+    fetchUserOrders()
+      .then((orders) => {
+        setMyOrders(orders);
+        if (orders.length > 0 && !searchParams.get("order")) {
+          setValue("orderNumber", orders[0].id);
+        }
+      })
+      .finally(() => setOrdersLoading(false));
+  }, [authLoaded, user, setValue, searchParams]);
+
+  useEffect(() => {
+    const orderParam = searchParams.get("order");
+    if (!orderParam) return;
+    setValue("orderNumber", orderParam.toUpperCase());
+  }, [searchParams, setValue]);
 
   const onSubmit = async (data: TrackOrderSchema) => {
     await trackOrder(data.orderNumber, data.phone);
@@ -80,8 +93,10 @@ export default function TrackOrderClient() {
 
   const onQuickSelect = async (orderId: string) => {
     setValue("orderNumber", orderId);
-    const phone = watch("phone") || user?.phone || "";
+    const selected = myOrders.find((o) => o.id === orderId);
+    const phone = watch("phone") || user?.phone || selected?.phone || selected?.shipping.phone || "";
     if (phone) {
+      if (!watch("phone")) setValue("phone", phone);
       await trackOrder(orderId, phone);
     }
   };
@@ -145,14 +160,14 @@ export default function TrackOrderClient() {
               ))}
             </select>
             <p className="text-xs text-ink-muted mt-1">
-              Pick an order to track instantly using your account phone.
+              Pick an order to track instantly.
             </p>
           </div>
         )}
 
         {user && !ordersLoading && myOrders.length === 0 && (
           <p className="text-sm text-ink-muted bg-cream rounded-xl p-3">
-            No orders on this account yet.{" "}
+            No orders on this account yet. Guest orders with your phone are linked when you sign in.{" "}
             <Link href="/shop" className="text-caramel font-medium hover:underline">
               Shop bears
             </Link>
@@ -163,7 +178,7 @@ export default function TrackOrderClient() {
           <label className="text-sm font-medium mb-1 block">Order Number</label>
           <input
             {...register("orderNumber")}
-            className="input-field"
+            className="input-field uppercase"
             placeholder="e.g. BH-12345"
           />
           {errors.orderNumber && (
@@ -206,7 +221,7 @@ export default function TrackOrderClient() {
           <div>
             <p className="font-medium">Order not found</p>
             <p className="mt-1">
-              Check your order number and phone. Orders appear here after checkout.
+              Check your order number (e.g. BH-12345) and the phone used at checkout.
             </p>
           </div>
         </div>

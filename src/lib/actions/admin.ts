@@ -172,7 +172,7 @@ export async function adminUpdateSiteSettings(data: SiteSettings) {
   await requireAdmin();
   const admin = createAdminClient();
   const row = mapSiteSettingsToDb(data);
-  const { error } = await admin.from("site_settings").update(row).eq("id", 1);
+  const { error } = await admin.from("site_settings").upsert({ id: 1, ...row });
   if (error) throw new Error(error.message);
   revalidateStore();
 }

@@ -47,7 +47,7 @@ export async function requestPasswordReset(
   email: string
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient();
-  const redirectTo = `${getSiteOrigin()}/auth/reset-password`;
+  const redirectTo = `${getSiteOrigin()}/auth/callback?next=${encodeURIComponent("/auth/reset-password")}`;
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
   if (error) return { ok: false, error: error.message };
@@ -138,12 +138,16 @@ export async function getWishlistProductIds(): Promise<string[]> {
 }
 
 /** `null` when not signed in — client should toggle local guest wishlist. */
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export async function toggleWishlistItem(productId: string): Promise<boolean | null> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
+  if (!UUID_RE.test(productId)) return null;
 
   const { data: existing } = await supabase
     .from("wishlist_items")

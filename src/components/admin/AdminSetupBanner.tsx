@@ -6,23 +6,23 @@ import { AlertCircle, X } from "lucide-react";
 import { useCatalogStore } from "@/store/catalogStore";
 
 export default function AdminSetupBanner() {
-  const products = useCatalogStore((s) => s.products);
   const loaded = useCatalogStore((s) => s.loaded);
+  const productsFromDatabase = useCatalogStore((s) => s.productsFromDatabase);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     setDismissed(sessionStorage.getItem("bearhug-admin-setup-dismissed") === "1");
   }, []);
 
-  if (!loaded || dismissed || products.length > 0) return null;
+  if (!loaded || dismissed || productsFromDatabase) return null;
 
   return (
     <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 flex gap-3">
       <AlertCircle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
       <div className="flex-1 text-sm">
-        <p className="font-semibold text-amber-900">Catalog empty</p>
+        <p className="font-semibold text-amber-900">Catalog not in database yet</p>
         <p className="text-amber-800 mt-1">
-          Go to{" "}
+          The shop is showing demo products. Go to{" "}
           <Link href="/admin/settings" className="underline font-medium">
             Settings
           </Link>{" "}
