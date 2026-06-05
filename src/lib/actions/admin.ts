@@ -6,11 +6,11 @@ import { randomUUID } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
+  asDbProductListRows,
   mapProduct,
   mapProductList,
   mapProductToDb,
   mapSiteSettingsToDb,
-  type DbProductListRow,
 } from "@/lib/supabase/mappers";
 import type { SiteSettings } from "@/types/admin";
 import type { Product } from "@/types/product";
@@ -89,6 +89,13 @@ function escapeIlike(q: string) {
   return q.replace(/[%_,]/g, " ").trim();
 }
 
+/** Dynamic Supabase `select()` strings produce incompatible row types on fallback queries. */
+type SupabaseRowsResult = {
+  data: unknown;
+  error: { message: string } | null;
+  count?: number | null;
+};
+
 /** Paginated admin table — loads 50 rows at a time instead of the full catalog. */
 export async function adminListProducts(opts?: {
   page?: number;
@@ -115,7 +122,7 @@ export async function adminListProducts(opts?: {
     return q.range(from, to);
   };
 
-  let res = await run(ADMIN_LIST_COLUMNS);
+  let res: SupabaseRowsResult = await run(ADMIN_LIST_COLUMNS);
   if (res.error?.message?.includes("does not exist")) {
     res = await run(
       "id, slug, name, tagline, price, size, color, image, badge, featured, created_at"
@@ -123,14 +130,14 @@ export async function adminListProducts(opts?: {
   }
 
   if (res.error) throw new Error(res.error.message);
-  const items = (res.data ?? []).map((row) =>
+  const items = asDbProductListRows(res.data).map((row) =>
     mapProductList({
-      ...(row as DbProductListRow),
-      tagline: "",
-      color: (row as { color?: string }).color ?? "Brown",
-      occasions: (row as { occasions?: string[] }).occasions ?? [],
-      brand: (row as { brand?: string }).brand ?? "",
-      in_stock: (row as { in_stock?: boolean }).in_stock ?? true,
+      ...row,
+      tagline: row.tagline ?? "",
+      color: row.color ?? "Brown",
+      occasions: row.occasions ?? [],
+      brand: row.brand ?? "",
+      in_stock: row.in_stock ?? true,
     })
   );
 
@@ -146,7 +153,7 @@ export async function adminListProducts(opts?: {
 export async function adminFetchProductsForBulk(): Promise<Product[]> {
   await requireAdmin();
   const admin = createAdminClient();
-  let res = await admin
+  let res: SupabaseRowsResult = await admin
     .from("products")
     .select(ADMIN_BULK_COLUMNS)
     .order("name", { ascending: true })
@@ -161,17 +168,17 @@ export async function adminFetchProductsForBulk(): Promise<Product[]> {
   }
 
   if (res.error) throw new Error(res.error.message);
-  return (res.data ?? []).map((row) =>
+  return asDbProductListRows(res.data).map((row) =>
     mapProductList({
-      ...(row as DbProductListRow),
+      ...row,
       image: "",
       tagline: "",
-      price: (row as { price?: number }).price ?? 0,
+      price: row.price ?? 0,
       badge: null,
       featured: false,
       created_at: "",
-      brand: (row as { brand?: string }).brand ?? "",
-      in_stock: (row as { in_stock?: boolean }).in_stock ?? true,
+      brand: row.brand ?? "",
+      in_stock: row.in_stock ?? true,
     })
   );
 }

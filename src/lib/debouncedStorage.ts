@@ -1,8 +1,10 @@
 import type { StateStorage } from "zustand/middleware";
 
+type TimerHandle = ReturnType<typeof globalThis.setTimeout>;
+
 /** Batches localStorage writes so clicks stay responsive. */
 export function createDebouncedLocalStorage(delayMs = 800): StateStorage {
-  const timers = new Map<string, ReturnType<typeof setTimeout>>();
+  const timers = new Map<string, TimerHandle>();
   const pending = new Map<string, string>();
 
   const flush = (name: string) => {
@@ -21,20 +23,18 @@ export function createDebouncedLocalStorage(delayMs = 800): StateStorage {
   const schedule = (name: string, value: string) => {
     pending.set(name, value);
     const existing = timers.get(name);
-    if (existing) clearTimeout(existing);
+    if (existing !== undefined) clearTimeout(existing);
 
     const run = () => flush(name);
+    const fire = () => {
+      if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+        window.requestIdleCallback(run, { timeout: delayMs + 200 });
+      } else {
+        run();
+      }
+    };
 
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      timers.set(
-        name,
-        window.setTimeout(() => {
-          window.requestIdleCallback(run, { timeout: delayMs + 200 });
-        }, delayMs) as ReturnType<typeof setTimeout>
-      );
-    } else {
-      timers.set(name, setTimeout(run, delayMs));
-    }
+    timers.set(name, globalThis.setTimeout(fire, delayMs));
   };
 
   return {
@@ -49,7 +49,7 @@ export function createDebouncedLocalStorage(delayMs = 800): StateStorage {
     removeItem: (name) => {
       if (typeof window === "undefined") return;
       const t = timers.get(name);
-      if (t) clearTimeout(t);
+      if (t !== undefined) clearTimeout(t);
       timers.delete(name);
       pending.delete(name);
       localStorage.removeItem(name);

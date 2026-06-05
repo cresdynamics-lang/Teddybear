@@ -22,6 +22,12 @@ export type DbProductListRow = Pick<
   in_stock?: boolean | null;
 };
 
+/** Supabase dynamic `select()` strings widen row types; normalize before mapping. */
+export function asDbProductListRows(data: unknown): DbProductListRow[] {
+  if (!Array.isArray(data)) return [];
+  return data as unknown as DbProductListRow[];
+}
+
 export function mapProductList(row: DbProductListRow): Product {
   return mapProduct({
     ...row,
