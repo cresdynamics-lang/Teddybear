@@ -45,7 +45,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           Skip to content
         </a>
         <AuthProvider>
-          <CatalogProvider initialCatalog={initialCatalog}>
+          <CatalogProvider initialCatalog={initialCatalog} skipCatalog={isAdminRoute}>
             <StorefrontShell>{children}</StorefrontShell>
           </CatalogProvider>
         </AuthProvider>

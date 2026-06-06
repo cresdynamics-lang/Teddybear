@@ -1,7 +1,7 @@
 import type { CatalogBundle } from "@/types/catalog";
 import type { Product } from "@/types/product";
 
-const CACHE_KEY = "bearhug-catalog-v9";
+const CACHE_KEY = "bearhug-catalog-v10";
 const MAX_AGE_MS = 60 * 60 * 1000;
 
 /** Minimal listing shape — keeps sessionStorage under quota for 662+ products. */

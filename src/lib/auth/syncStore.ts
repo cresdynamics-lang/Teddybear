@@ -11,8 +11,13 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+type LoadAuthOptions = {
+  /** Skip wishlist sync and order linking on admin routes. */
+  adminLight?: boolean;
+};
+
 /** Load Supabase session into Zustand; retries while cookies propagate after sign-in. */
-export async function loadAuthIntoStore(attempts = 4): Promise<boolean> {
+export async function loadAuthIntoStore(attempts = 4, opts?: LoadAuthOptions): Promise<boolean> {
   const { setUser, setIsAdmin, clear, setLoaded } = useAuthStore.getState();
   const setWishlistIds = useWishlistStore.getState().setIds;
   const guestWishlistIds = [...useWishlistStore.getState().ids];
@@ -29,6 +34,12 @@ export async function loadAuthIntoStore(attempts = 4): Promise<boolean> {
       await supabase.auth.getSession();
       const user = await getCurrentUser();
       if (user) {
+        if (opts?.adminLight) {
+          const isAdmin = await checkIsAdmin();
+          setUser(user);
+          setIsAdmin(isAdmin);
+          return true;
+        }
         await linkOrdersToUserByPhone();
         const [isAdmin, serverWishlistIds] = await Promise.all([
           checkIsAdmin(),

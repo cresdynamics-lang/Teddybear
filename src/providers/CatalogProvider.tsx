@@ -11,42 +11,46 @@ type Props = {
   children: React.ReactNode;
   /** Server-fetched catalog so the shop is not blocked on a slow client /api/catalog call. */
   initialCatalog?: CatalogBundle;
+  /** Admin routes never need the full storefront catalog. */
+  skipCatalog?: boolean;
 };
+
+function isLiveCatalog(bundle: CatalogBundle | null | undefined): bundle is CatalogBundle {
+  return Boolean(bundle?.productsFromDatabase && bundle.products.length > 0);
+}
 
 function applyBundle(bundle: CatalogBundle) {
   useCatalogStore.getState().hydrate(bundle);
-  writeCatalogCache(bundle);
+  if (bundle.productsFromDatabase) {
+    writeCatalogCache(bundle);
+  }
 }
 
-export default function CatalogProvider({ children, initialCatalog }: Props) {
+export default function CatalogProvider({ children, initialCatalog, skipCatalog }: Props) {
   const hydrate = useCatalogStore((s) => s.hydrate);
-  const loaded = useCatalogStore((s) => s.loaded);
+  const productsFromDatabase = useCatalogStore((s) => s.productsFromDatabase);
   const setLoading = useCatalogStore((s) => s.setLoading);
-  const seeded = useRef(false);
+  const fetchStarted = useRef(false);
 
   useLayoutEffect(() => {
-    if (seeded.current) return;
-    if (initialCatalog?.products?.length) {
-      seeded.current = true;
-      queueMicrotask(() => applyBundle(initialCatalog));
+    if (skipCatalog) {
+      useCatalogStore.setState({ loaded: true, loading: false });
+      return;
+    }
+    if (isLiveCatalog(initialCatalog)) {
+      applyBundle(initialCatalog);
       return;
     }
     const cached = readCatalogCache();
-    if (cached?.products?.length) {
-      seeded.current = true;
-      queueMicrotask(() => hydrate(cached));
+    if (isLiveCatalog(cached)) {
+      hydrate(cached);
     }
-  }, [initialCatalog, hydrate]);
+  }, [initialCatalog, hydrate, skipCatalog]);
 
   useEffect(() => {
-    if (loaded || seeded.current) return;
-
-    const cached = readCatalogCache();
-    if (cached?.products?.length) {
-      seeded.current = true;
-      hydrate(cached);
-      return;
-    }
+    if (skipCatalog || productsFromDatabase) return;
+    if (fetchStarted.current) return;
+    fetchStarted.current = true;
 
     const controller = new AbortController();
     let cancelled = false;
@@ -58,15 +62,13 @@ export default function CatalogProvider({ children, initialCatalog }: Props) {
         if (!res.ok) throw new Error("catalog fetch failed");
         const bundle = (await res.json()) as CatalogBundle;
         if (cancelled) return;
-        if (bundle.products?.length) {
-          seeded.current = true;
+        if (isLiveCatalog(bundle)) {
           applyBundle(bundle);
-        } else {
-          throw new Error("empty catalog");
+          return;
         }
-      } catch (err) {
+        throw new Error("catalog not in database");
+      } catch {
         if (cancelled || controller.signal.aborted) return;
-        seeded.current = true;
         hydrate({
           products: DEFAULT_PRODUCTS,
           testimonials: DEFAULT_TESTIMONIALS,
@@ -75,9 +77,7 @@ export default function CatalogProvider({ children, initialCatalog }: Props) {
           testimonialsFromDatabase: false,
         });
       } finally {
-        if (!cancelled && !useCatalogStore.getState().loaded) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     }
 
@@ -85,11 +85,12 @@ export default function CatalogProvider({ children, initialCatalog }: Props) {
     return () => {
       cancelled = true;
       controller.abort();
+      fetchStarted.current = false;
     };
-  }, [hydrate, loaded, setLoading]);
+  }, [hydrate, productsFromDatabase, setLoading, skipCatalog]);
 
   return (
-    <CatalogSeedContext.Provider value={initialCatalog ?? null}>
+    <CatalogSeedContext.Provider value={skipCatalog ? null : (initialCatalog ?? null)}>
       {children}
     </CatalogSeedContext.Provider>
   );

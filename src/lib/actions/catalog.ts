@@ -82,7 +82,9 @@ export async function fetchCatalogBundle(): Promise<CatalogBundle> {
       settings = mapSiteSettings(settingsRes.data);
     }
   } catch {
-    /* use defaults */
+    /* Missing env or network — leave products empty; client will call /api/catalog */
+    products = [];
+    productsFromDatabase = false;
   }
 
   return {
@@ -117,13 +119,32 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
 }
 
 export async function fetchTestimonials(): Promise<Testimonial[]> {
-  const bundle = await fetchCatalogBundle();
-  return bundle.testimonials;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("testimonials")
+      .select("*")
+      .order("created_at");
+    if (!error && data?.length) return data.map(mapTestimonial);
+  } catch {
+    /* fallback */
+  }
+  return DEFAULT_TESTIMONIALS;
 }
 
 export async function fetchSiteSettings(): Promise<SiteSettings> {
-  const bundle = await fetchCatalogBundle();
-  return bundle.settings;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("site_settings")
+      .select("*")
+      .eq("id", 1)
+      .maybeSingle();
+    if (!error && data) return mapSiteSettings(data);
+  } catch {
+    /* fallback */
+  }
+  return defaultSiteSettings;
 }
 
 /** Admin: only rows stored in Supabase (no demo fallback). */

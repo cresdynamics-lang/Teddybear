@@ -5,32 +5,40 @@ import Link from "next/link";
 import { Package, ShoppingCart, Users, TrendingUp, DollarSign } from "lucide-react";
 import { useCatalogStore } from "@/store/catalogStore";
 import AdminSetupBanner from "@/components/admin/AdminSetupBanner";
-import { fetchAllCustomers, fetchAllOrders } from "@/lib/actions/orders";
+import { adminDashboardStats, type AdminDashboardStats } from "@/lib/actions/orders";
 import { formatKES } from "@/lib/format";
-import type { Order } from "@/types/order";
-import type { User } from "@/types/order";
+
+const EMPTY_STATS: AdminDashboardStats = {
+  orderCount: 0,
+  customerCount: 0,
+  pendingCount: 0,
+  totalRevenue: 0,
+  recentOrders: [],
+};
 
 export default function AdminDashboard() {
-  const productCount = useCatalogStore((s) =>
-    s.products.length > 0 ? s.products.length : s.catalogProductCount
-  );
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [customers, setCustomers] = useState<User[]>([]);
+  const productCount = useCatalogStore((s) => s.catalogProductCount);
+  const [stats, setStats] = useState<AdminDashboardStats>(EMPTY_STATS);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAllOrders().then(setOrders).catch(() => setOrders([]));
-    fetchAllCustomers().then(setCustomers).catch(() => setCustomers([]));
+    adminDashboardStats()
+      .then(setStats)
+      .catch(() => setStats(EMPTY_STATS))
+      .finally(() => setLoading(false));
   }, []);
 
-  const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
-  const pendingOrders = orders.filter((o) => o.status !== "delivered").length;
-
-  const stats = [
+  const cards = [
     { label: "Total Products", value: productCount, icon: Package, href: "/admin/products" },
-    { label: "Total Orders", value: orders.length, icon: ShoppingCart, href: "/admin/orders" },
-    { label: "Pending Orders", value: pendingOrders, icon: TrendingUp, href: "/admin/orders" },
-    { label: "Customers", value: customers.length, icon: Users, href: "/admin/customers" },
-    { label: "Revenue", value: formatKES(totalRevenue), icon: DollarSign, href: "/admin/orders" },
+    { label: "Total Orders", value: stats.orderCount, icon: ShoppingCart, href: "/admin/orders" },
+    { label: "Pending Orders", value: stats.pendingCount, icon: TrendingUp, href: "/admin/orders" },
+    { label: "Customers", value: stats.customerCount, icon: Users, href: "/admin/customers" },
+    {
+      label: "Revenue",
+      value: formatKES(stats.totalRevenue),
+      icon: DollarSign,
+      href: "/admin/orders",
+    },
   ];
 
   return (
@@ -42,7 +50,7 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-10">
-        {stats.map(({ label, value, icon: Icon, href }) => (
+        {cards.map(({ label, value, icon: Icon, href }) => (
           <Link
             key={label}
             href={href}
@@ -50,7 +58,7 @@ export default function AdminDashboard() {
           >
             <Icon className="w-5 h-5 text-caramel mb-3" />
             <p className="text-2xl font-semibold text-ink group-hover:text-caramel transition-colors">
-              {value}
+              {loading && label !== "Total Products" ? "…" : value}
             </p>
             <p className="text-xs text-ink-muted mt-1">{label}</p>
           </Link>
@@ -65,19 +73,26 @@ export default function AdminDashboard() {
               View all
             </Link>
           </div>
-          {orders.length === 0 ? (
+          {loading ? (
+            <p className="text-sm text-ink-muted py-4">Loading orders…</p>
+          ) : stats.recentOrders.length === 0 ? (
             <p className="text-sm text-ink-muted py-4">No orders yet.</p>
           ) : (
             <ul className="space-y-3">
-              {orders.slice(0, 5).map((o) => (
-                <li key={o.id} className="flex justify-between items-center text-sm border-b border-gray-100 pb-3 last:border-0">
+              {stats.recentOrders.map((o) => (
+                <li
+                  key={o.id}
+                  className="flex justify-between items-center text-sm border-b border-gray-100 pb-3 last:border-0"
+                >
                   <div>
                     <p className="font-medium text-caramel">{o.id}</p>
                     <p className="text-ink-muted text-xs">{o.shipping.name}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">{formatKES(o.total)}</p>
-                    <p className="text-xs text-ink-muted capitalize">{o.status.replace(/_/g, " ")}</p>
+                    <p className="text-xs text-ink-muted capitalize">
+                      {o.status.replace(/_/g, " ")}
+                    </p>
                   </div>
                 </li>
               ))}

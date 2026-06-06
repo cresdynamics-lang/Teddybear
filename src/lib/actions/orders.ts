@@ -162,6 +162,79 @@ export async function fetchUserOrders(): Promise<Order[]> {
   return (data ?? []).map(mapOrder);
 }
 
+export type AdminDashboardStats = {
+  orderCount: number;
+  customerCount: number;
+  pendingCount: number;
+  totalRevenue: number;
+  recentOrders: Order[];
+};
+
+/** Lightweight dashboard stats — avoids loading full order payloads on every visit. */
+export async function adminDashboardStats(): Promise<AdminDashboardStats> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      orderCount: 0,
+      customerCount: 0,
+      pendingCount: 0,
+      totalRevenue: 0,
+      recentOrders: [],
+    };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profile?.role !== "admin") {
+    return {
+      orderCount: 0,
+      customerCount: 0,
+      pendingCount: 0,
+      totalRevenue: 0,
+      recentOrders: [],
+    };
+  }
+
+  const admin = createAdminClient();
+  const [
+    { count: orderCount },
+    { count: customerCount },
+    { count: pendingCount },
+    { data: totals },
+    { data: recent },
+  ] = await Promise.all([
+    admin.from("orders").select("*", { count: "exact", head: true }),
+    admin.from("profiles").select("*", { count: "exact", head: true }).eq("role", "customer"),
+    admin
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .neq("status", "delivered"),
+    admin.from("orders").select("total"),
+    admin
+      .from("orders")
+      .select("id, total, status, shipping, created_at, items, subtotal, delivery_fee, gift_wrap, payment_method, phone, user_id")
+      .order("created_at", { ascending: false })
+      .limit(5),
+  ]);
+
+  const totalRevenue = (totals ?? []).reduce((sum, row) => sum + (row.total ?? 0), 0);
+
+  return {
+    orderCount: orderCount ?? 0,
+    customerCount: customerCount ?? 0,
+    pendingCount: pendingCount ?? 0,
+    totalRevenue,
+    recentOrders: (recent ?? []).map(mapOrder),
+  };
+}
+
 export async function fetchAllOrders(): Promise<Order[]> {
   const supabase = await createClient();
   const {

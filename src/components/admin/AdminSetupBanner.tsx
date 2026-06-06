@@ -8,13 +8,17 @@ import { useCatalogStore } from "@/store/catalogStore";
 export default function AdminSetupBanner() {
   const loaded = useCatalogStore((s) => s.loaded);
   const productsFromDatabase = useCatalogStore((s) => s.productsFromDatabase);
+  const catalogProductCount = useCatalogStore((s) => s.catalogProductCount);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     setDismissed(sessionStorage.getItem("bearhug-admin-setup-dismissed") === "1");
   }, []);
 
-  if (!loaded || dismissed || productsFromDatabase) return null;
+  const hasCatalog =
+    productsFromDatabase || catalogProductCount > 0;
+
+  if (!loaded || dismissed || hasCatalog) return null;
 
   return (
     <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 flex gap-3">

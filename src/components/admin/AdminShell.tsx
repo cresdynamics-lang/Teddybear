@@ -6,9 +6,7 @@ import Link from "next/link";
 import { Menu, ExternalLink } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useCatalogStore } from "@/store/catalogStore";
-import { checkIsAdmin } from "@/lib/actions/admin";
 import AdminSidebar from "./AdminSidebar";
-import PageLoader from "@/components/PageLoader";
 
 export default function AdminShell({
   children,
@@ -22,8 +20,6 @@ export default function AdminShell({
   const authLoaded = useAuthStore((s) => s.loaded);
   const user = useAuthStore((s) => s.user);
   const isAdmin = useAuthStore((s) => s.isAdmin);
-  const [checking, setChecking] = useState(true);
-  const [allowed, setAllowed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const isLoginPage = pathname === "/admin/login";
@@ -34,52 +30,20 @@ export default function AdminShell({
   }, [productCount]);
 
   useEffect(() => {
-    if (!authLoaded) return;
-
-    if (isLoginPage) {
-      if (isAdmin) router.replace("/admin");
-      setChecking(false);
-      return;
-    }
-
-    if (isAdmin) {
-      setAllowed(true);
-      setChecking(false);
-      return;
-    }
-
-    if (!user) {
-      setChecking(false);
+    if (!authLoaded || isLoginPage) return;
+    if (!user && !isAdmin) {
       router.replace("/admin/login");
-      return;
     }
+  }, [authLoaded, user, isAdmin, isLoginPage, router]);
 
-    let cancelled = false;
-    checkIsAdmin().then((ok) => {
-      if (cancelled) return;
-      setAllowed(ok);
-      setChecking(false);
-      if (!ok) router.replace("/admin/login");
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [authLoaded, isAdmin, user, isLoginPage, router]);
-
-  if (!authLoaded || checking) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <PageLoader label="Loading admin…" full={false} />
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!authLoaded || !isLoginPage) return;
+    if (isAdmin) router.replace("/admin");
+  }, [authLoaded, isAdmin, isLoginPage, router]);
 
   if (isLoginPage) {
     return <>{children}</>;
   }
-
-  if (!allowed) return null;
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -1,5 +1,6 @@
 "use server";
 
+import { cache } from "react";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { CATALOG_CACHE_TAG } from "@/lib/cachedCatalog";
 import { randomUUID } from "crypto";
@@ -19,7 +20,7 @@ import { SEED_CATALOG_PRODUCTS } from "@/lib/seedCatalog";
 import { defaultSiteSettings } from "@/store/catalogStore";
 import { isAllowedImageMime, resolveImageMime } from "@/lib/imageMime";
 
-async function requireAdmin() {
+export const requireAdmin = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -34,7 +35,7 @@ async function requireAdmin() {
 
   if (profile?.role !== "admin") throw new Error("Admin access required");
   return user;
-}
+});
 
 function slugify(text: string) {
   return text

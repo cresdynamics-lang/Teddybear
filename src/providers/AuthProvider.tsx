@@ -14,8 +14,10 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       setLoaded(true);
       return;
     }
+    const adminLight =
+      typeof window !== "undefined" && window.location.pathname.startsWith("/admin");
     try {
-      await loadAuthIntoStore();
+      await loadAuthIntoStore(4, { adminLight });
     } finally {
       setLoaded(true);
     }
